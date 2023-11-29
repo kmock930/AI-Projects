@@ -1,0 +1,70 @@
+/*
+
+Narrative about selling a book.
+
+Author: 57027.
+Date: April 2020.
+
+*/
+
+/* Rigid facts */
+person(bob).
+person(mary).
+prolog_book(b1).
+title(b1,'Prolog primer').
+
+
+
+/* Abnormal fluents (ruled out) after a person buys and GETS a book successfully. */
+abnormal(happy(X),sell(_,_,X,_),_).
+/* Frame axiom of what remains the same after selling a book. */
+holds(\+happy(X),do(A,S)) :- % The person X remains unhappy no matter what action A is.
+    holds(\+happy(X),S),
+    \+ abnormal(happy(X),A,S). % Except a book has been bought by X.
+
+
+/* Initial situation */
+holds(lives(bob,uk),s0).
+holds(lives(mary,uk),s0).
+holds(owns(mary,b1),s0).
+holds(value(b1,20),s0).
+holds(happy(mary),s0).
+holds(has(bob,50),s0).
+
+
+holds(poss(sell(mary,b1,bob,20)),do(owns(mary,b1),s0)).
+holds(happy(bob),do(sell(mary,b1,bob,20),s0)).
+
+/* Effect axioms after selling a book. */
+holds(\+owns(Seller,Object),do(sell(Seller,Object,Buyer,Price),S)) :-
+    poss(sell(Seller,Object,Buyer,Price),S).
+holds(owns(Buyer,Object),do(sell(Seller,Object,Buyer,Price),S)) :-
+    poss(sell(Seller,Object,Buyer,Price),S).
+holds(happy(Buyer),do(sell(Seller,Object,Buyer,Price),S)) :-
+    poss(sell(Seller,Object,Buyer,Price),S).
+
+holds(retract(owns(Seller,Object)),do(sell(Seller,Object,Buyer,Price),S)) :-
+    poss(sell(Seller,Object,Buyer,Price),S).
+holds(has(Seller,Asset+Price),do(sell(Seller,Object,Buyer,Price),S)) :-
+    holds(has(Seller,Asset),S),
+    poss(sell(Seller,Object,Buyer,Price),S).
+holds(has(Buyer,Asset-Price),do(sell(Seller,Object,Buyer,Price),S)) :-
+    holds(has(Seller,Asset),S),
+    poss(sell(Seller,Object,Buyer,Price),S).
+holds(assert(owns(Buyer,Object)),do(sell(Seller,Object,Buyer,Price),S)) :-
+    poss(sell(Seller,Object,Buyer,Price),S).
+holds(value(Object,OriginalValue * 0.8),do(sell(Seller,Object,Buyer,Price),S)) :-
+    holds(value(Object,OriginalValue),S),
+    poss(sell(Seller,Object,Buyer,Price),S).
+holds(happy(Buyer),do(sell(Seller,Object,Buyer,Price),S)) :-
+    poss(sell(Seller,Object,Buyer,Price),S).
+
+/* Action preconditions for selling an object (a book) to someone else. */
+poss(sell(Seller,Object,Buyer,Price),S) :-
+    title(Object,_),
+    person(Seller),
+    person(Buyer),
+    Seller \= Buyer,
+    holds(has(Buyer,Asset),S),
+    holds(value(Object,Price),S),
+    Asset >= Price. % Affordability check of the buyer before selling.

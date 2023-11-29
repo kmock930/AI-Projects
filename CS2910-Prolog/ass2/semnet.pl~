@@ -1,0 +1,61 @@
+/*
+ * Author: 57027
+ * Date: March 2020
+ *
+ * Gregory, Dave and Sara are all individuals.
+ * Typically, all persons have a nose.
+ * A chess player is a man.
+ * A baseball player is also a man.
+ * A baseball player is of default height 195cm.
+ * A man has a default height of 178cm.
+ * Any person who is neither a man, a chess player,
+ * nor a baseball player, is of default height 163cm.
+ *
+*/
+
+/* Transitive closure for isa */
+isa(X,Z) :-
+    is_a(X,Y),
+    isa(Y,Z).
+isa(X,Y) :-
+    is_a(X,Y).
+
+is_a(chess_player,man).
+is_a(baseball_player,man).
+is_a(man,person).
+is_a(X,Y) :- instance(X,Y).
+
+/*
+ * Creation relations between individual instance and its identity.
+*/
+instance(gregory,baseball_player).
+instance(dave,chess_player).
+instance(sara,person).
+
+/*
+ * Creation of individuals instances.
+*/
+individual(gregory).
+individual(dave).
+individual(sara).
+
+/*
+ * Questions: Tasks to accomplish.
+*/
+has_nose(X) :- % checks whether the individual has a nose.
+    individual(X),
+    isa(X,person).
+height_of(X,163) :- % checks the height of an individual if he's solely a person.
+    individual(X),
+    isa(X,person),
+    \+isa(X,man),
+    \+isa(X,baseball_player).
+height_of(X,178) :- % checks the height of an individual if he's a man.
+    individual(X),
+    isa(X,man),
+    \+isa(X,baseball_player). % rejecting the cases when a person is a man and also a baseball player.
+height_of(X,195) :- % checks the height of an individual if he's a baseball_player.
+    individual(X),
+    isa(X,baseball_player).
+
+
